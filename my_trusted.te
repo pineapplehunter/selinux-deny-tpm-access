@@ -1,0 +1,40 @@
+policy_module(my_trusted, 1.0)
+
+require {
+    type unconfined_t;
+    type user_devpts_t;
+    role unconfined_r;
+
+    class chr_file { open read write ioctl getattr };
+    class process transition;
+    class file { read open execute getattr entrypoint };
+}
+
+# --- TPM device type ---
+type my_tpm_device_t;
+
+# --- Trusted domain ---
+type my_trusted_t;
+type my_trusted_exec_t;
+
+# Role association
+role unconfined_r types my_trusted_t;
+
+# Domain setup
+application_domain(my_trusted_t, my_trusted_exec_t)
+
+# Allow execution from unconfined domain
+allow unconfined_t my_trusted_exec_t:file { read open execute getattr };
+
+# Domain transition
+allow unconfined_t my_trusted_t:process transition;
+domain_auto_trans(unconfined_t, my_trusted_exec_t, my_trusted_t)
+
+# Entrypoint
+allow my_trusted_t my_trusted_exec_t:file entrypoint;
+
+# Terminal access
+allow my_trusted_t user_devpts_t:chr_file { read write open getattr ioctl };
+
+# TPM access
+allow my_trusted_t my_tpm_device_t:chr_file { open read write ioctl getattr };

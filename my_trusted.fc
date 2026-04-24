@@ -1,0 +1,2 @@
+/dev/tpm[0-9]*    -c    system_u:object_r:my_tpm_device_t:s0
+/dev/tpmrm[0-9]*  -c    system_u:object_r:my_tpm_device_t:s0
