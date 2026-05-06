@@ -4,6 +4,10 @@ require {
     type unconfined_t;
     type user_devpts_t;
     role unconfined_r;
+    # attribute dev_type;
+    # attribute file_type;
+    # attribute chr_type;
+    attribute device_node;
 
     class chr_file { open read write ioctl getattr };
     class process transition;
@@ -12,6 +16,13 @@ require {
 
 # --- TPM device type ---
 type my_tpm_device_t;
+# dev_node(my_tpm_device_t);
+# files_type(my_tpm_device_t);
+# typeattribute my_tpm_device_t file_type;
+# typeattribute my_tpm_device_t dev_type;
+# typeattribute my_tpm_device_t chr_type;
+typeattribute my_tpm_device_t device_node;
+
 
 # --- Trusted domain ---
 type my_trusted_t;
