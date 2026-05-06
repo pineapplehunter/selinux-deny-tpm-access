@@ -24,6 +24,7 @@ application_domain(my_trusted_t, my_trusted_exec_t)
 # Allow unconfined domain to execute trusted binaries and transition
 allow unconfined_t my_trusted_exec_t:file { read open execute getattr };
 allow unconfined_t my_trusted_t:process transition;
+auditallow unconfined_t my_trusted_t:process transition;
 domain_auto_trans(unconfined_t, my_trusted_exec_t, my_trusted_t)
 
 allow my_trusted_t my_trusted_exec_t:file entrypoint;
@@ -34,4 +35,6 @@ allow my_trusted_t user_devpts_t:chr_file { read write open getattr ioctl };
 # TPM access for trusted domain
 allow my_trusted_t my_tpm_device_t:chr_file { open read write ioctl getattr };
 allow unconfined_t my_tpm_device_t:chr_file { relabelto getattr };
+auditallow unconfined_t my_tpm_device_t:chr_file { relabelto };
 allow my_tpm_device_t device_t:filesystem associate;
+auditallow my_tpm_device_t device_t:filesystem associate;
