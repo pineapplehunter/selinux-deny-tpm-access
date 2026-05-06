@@ -3,54 +3,35 @@ policy_module(my_trusted, 1.0)
 gen_require(`
     type unconfined_t;
     type user_devpts_t;
-    type net_conf_t, proc_net_t,user_tty_device_t,device_t;
     role unconfined_r;
-    # attribute dev_type;
-    attribute file_type;
-    # attribute chr_type;
-    # attribute device_node;
 
     class chr_file { open read write ioctl getattr };
     class process transition;
     class file { read open execute getattr entrypoint };
 ')
 
-# --- TPM device type ---
+# TPM device type that unconfined processes cannot access
 type my_tpm_device_t;
 neverallow unconfined_t my_tpm_device_t:chr_file *;
-# dev_node(my_tpm_device_t);
-# files_type(my_tpm_device_t);
-# typeattribute my_tpm_device_t file_type;
-# typeattribute my_tpm_device_t dev_type;
-# typeattribute my_tpm_device_t chr_type;
-# typeattribute my_tpm_device_t device_node;
-# typeattribute my_tpm_device_t file_type;
 
-allow my_tpm_device_t device_t:filesystem associate;
-
-# --- Trusted domain ---
+# Trusted domain for processes allowed to access TPM
 type my_trusted_t;
 type my_trusted_exec_t;
 
-# Role association
 role unconfined_r types my_trusted_t;
 
-# Domain setup
 application_domain(my_trusted_t, my_trusted_exec_t)
 
-# Allow execution from unconfined domain
+# Allow unconfined domain to execute trusted binaries and transition
 allow unconfined_t my_trusted_exec_t:file { read open execute getattr };
-allow unconfined_t my_tpm_device_t:chr_file { relabelto };
-
-# Domain transition
 allow unconfined_t my_trusted_t:process transition;
 domain_auto_trans(unconfined_t, my_trusted_exec_t, my_trusted_t)
 
-# Entrypoint
 allow my_trusted_t my_trusted_exec_t:file entrypoint;
 
-# Terminal access
+# Terminal access for trusted domain
 allow my_trusted_t user_devpts_t:chr_file { read write open getattr ioctl };
 
-# TPM access
+# TPM access for trusted domain
 allow my_trusted_t my_tpm_device_t:chr_file { open read write ioctl getattr };
+allow unconfined_t my_tpm_device_t:chr_file { relabelto };
