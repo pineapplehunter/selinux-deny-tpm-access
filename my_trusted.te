@@ -1,8 +1,7 @@
 policy_module(my_trusted, 1.0)
 
 gen_require(`
-    type unconfined_t;
-    type user_devpts_t;
+    type unconfined_t, user_devpts_t, device_t;
     role unconfined_r;
 
     class chr_file { open read write ioctl getattr };
@@ -34,4 +33,5 @@ allow my_trusted_t user_devpts_t:chr_file { read write open getattr ioctl };
 
 # TPM access for trusted domain
 allow my_trusted_t my_tpm_device_t:chr_file { open read write ioctl getattr };
-allow unconfined_t my_tpm_device_t:chr_file { relabelto };
+allow unconfined_t my_tpm_device_t:chr_file { relabelto getattr };
+allow my_tpm_device_t device_t:filesystem associate;
