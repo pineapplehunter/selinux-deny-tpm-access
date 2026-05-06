@@ -28,22 +28,33 @@ This uses the SELinux development infrastructure to compile the `.te`, `.fc`, an
 
 ## Installing the Policy
 
-Install the compiled policy module (also sets up file contexts automatically):
+Install the compiled policy module and apply labels to TPM devices:
 
 ```bash
 make install
 ```
 
-This runs `semodule -i` and configures file context mappings for `/dev/tpm*` devices using `semanage fcontext`, then applies them with `restorecon`.
+This runs `semodule -i` and applies immediate labels to `/dev/tpm*` devices using `chcon`.
 
 Or manually:
 
 ```bash
 sudo semodule -i my_trusted.pp
-sudo semanage fcontext -a -t my_tpm_device_t '/dev/tpm[0-9]*'
-sudo semanage fcontext -a -t my_tpm_device_t '/dev/tpmrm[0-9]*'
-sudo restorecon -rv /dev/tpm*
+sudo chcon -t my_tpm_device_t /dev/tpm*
+sudo chmod 666 /dev/tpmrm*
 ```
+
+Note: These labels are not persistent across reboots. For persistent labeling, use `semanage fcontext` commands.
+
+## Labeling Trusted Executables
+
+To label executables that should run in the `my_trusted_t` domain:
+
+```bash
+make chcon-exe
+```
+
+This sets the `my_trusted_exec_t` type on `tpm2_pcrread`.
 
 ## Verifying Installation
 
